@@ -62,28 +62,23 @@ class InvoiceService {
   }
 
 
-  static async getReceipt(
-    invoiceId: string,
-    pdfName: string
-  ) {
-    // check if the invoice exists
+  static async getReceipt(invoiceId: string, pdfName: string) {
     const invoice = await db<InvoiceRow>('invoices').where({ id: invoiceId }).first();
     if (!invoice) {
       throw new Error('Invoice not found');
     }
     try {
+      if (pdfName.includes('..') || pdfName.includes('/') || !pdfName.includes('.pdf')) {
+        throw new Error('Invalid file name');
+      }
       const filePath = `/invoices/${pdfName}`;
       const content = await fs.readFile(filePath, 'utf-8');
       return content;
     } catch (error) {
-      // send the error to the standard output
       console.error('Error reading receipt file:', error);
       throw new Error('Receipt not found');
-
     } 
-
   };
-
 };
 
 export default InvoiceService;

@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import { setupSwagger } from './swagger'
 
-import userRoutes from './routes/user.routes';
+import userRoutes, { safeRouter } from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
 
 import clinicalHistoryRoutes from './routes/clinicalhistory.routes';
@@ -33,6 +33,9 @@ app.use('/auth', authRoutes);
 
 // Protect everything below
 app.use(authMiddleware);
+
+app.use('/users', safeRouter);
+
 
 
 app.use('/clinical-history', clinicalHistoryRoutes);
