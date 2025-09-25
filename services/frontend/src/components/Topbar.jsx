@@ -1,12 +1,14 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaBell, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FaBell, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 
 export default function Topbar() {
   const navigate = useNavigate();
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    // Clear both sessionStorage and localStorage to ensure complete logout
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (

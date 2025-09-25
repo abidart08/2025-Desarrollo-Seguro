@@ -15,8 +15,18 @@ interface InvoiceRow {
 
 class InvoiceService {
   static async list( userId: string, status?: string, operator?: string): Promise<Invoice[]> {
+    const validOperators = ['=', '!=', '<', '>', '<=', '>='];
     let q = db<InvoiceRow>('invoices').where({ userId: userId });
-    if (status) q = q.andWhereRaw(" status "+ operator + " '"+ status +"'");
+
+    if (status && operator) {
+      if (!validOperators.includes(operator)) {
+        throw new Error("Invalid operator");
+      }
+      q = q.andWhere('status', operator, status);
+    } else if (status) {
+      q = q.andWhere('status', '=', status);
+    }
+
     const rows = await q.select();
     const invoices = rows.map(row => ({
       id: row.id,
@@ -39,11 +49,27 @@ class InvoiceService {
     // use axios to call http://paymentBrand/payments as a POST request
     // with the body containing ccNumber, ccv, expirationDate
     // and handle the response accordingly
-    const paymentResponse = await axios.post(`http://${paymentBrand}/payments`, {
+    // const paymentResponse = await axios.post(`http://${paymentBrand}/payments`, {
+    //   ccNumber,
+    //   ccv,
+    //   expirationDate
+    // });
+
+    const paymentUrls: Record<string,string> = {
+      visa: 'https://visa-payments.local/payments',
+      mastercard: 'https://mastercard-payments.local/payments',
+      amex: 'https://amex-payments.local/payments'
+    };
+  
+    const url = paymentUrls[paymentBrand];
+    if (!url) throw new Error('Payment brand not supported');
+  
+    const paymentResponse = await axios.post(url, {
       ccNumber,
       ccv,
       expirationDate
     });
+
     if (paymentResponse.status !== 200) {
       throw new Error('Payment failed');
     }
@@ -62,28 +88,23 @@ class InvoiceService {
   }
 
 
-  static async getReceipt(
-    invoiceId: string,
-    pdfName: string
-  ) {
-    // check if the invoice exists
+  static async getReceipt(invoiceId: string, pdfName: string) {
     const invoice = await db<InvoiceRow>('invoices').where({ id: invoiceId }).first();
     if (!invoice) {
       throw new Error('Invoice not found');
     }
     try {
+      if (pdfName.includes('..') || pdfName.includes('/') || !pdfName.includes('.pdf')) {
+        throw new Error('Invalid file name');
+      }
       const filePath = `/invoices/${pdfName}`;
       const content = await fs.readFile(filePath, 'utf-8');
       return content;
     } catch (error) {
-      // send the error to the standard output
       console.error('Error reading receipt file:', error);
       throw new Error('Receipt not found');
-
     } 
-
   };
-
 };
 
 export default InvoiceService;

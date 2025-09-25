@@ -1,18 +1,23 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 
 const generateToken = (userId: string) => {
-  return jwt.sign(
-    { id: userId }, 
-    "secreto_super_seguro", 
-    { expiresIn: '1h' }
-  );
+  return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "1h" });
 };
 
 const verifyToken = (token: string) => {
-  return jwt.verify(token, "secreto_super_seguro");
+  return jwt.verify(token, JWT_SECRET);
 };
 
 export default {
   generateToken,
-  verifyToken
-}
+  verifyToken,
+};
