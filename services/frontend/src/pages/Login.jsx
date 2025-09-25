@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api.js';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api.js";
 
 export default function Login() {
-  const [creds, setCreds] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [creds, setCreds] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = e =>
+  const handleChange = (e) =>
     setCreds({ ...creds, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/login', creds);
+      const res = await api.post("/auth/login", creds);
 
-      localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+      // Use sessionStorage instead of localStorage for better security
+      // sessionStorage is cleared when the browser tab is closed
+      sessionStorage.setItem("token", res.data.token);
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -34,7 +36,10 @@ export default function Login() {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="username"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Username
               </label>
               <div className="mt-2">
@@ -52,7 +57,10 @@ export default function Login() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
+                <label
+                  htmlFor="password"
+                  className="block text-sm/6 font-medium text-gray-900"
+                >
                   Password
                 </label>
               </div>
@@ -78,20 +86,26 @@ export default function Login() {
               </button>
             </div>
           </form>
-        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             {error && <p className="text-red-500 mt-4">{error}</p>}
-        </div>
-          
-      <div className="flex items-center justify-between">
-        <Link to="/forgot-password" className="block text-blue-600 mt-4 hover:underline">
-          Forgot my password?
-        </Link>
-      </div>
-      <div className="flex items-center justify-between">
-        <Link to="/register" className="block text-blue-600 mt-2 hover:underline">
-          Don’t have an account? Register
-        </Link>
-      </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Link
+              to="/forgot-password"
+              className="block text-blue-600 mt-4 hover:underline"
+            >
+              Forgot my password?
+            </Link>
+          </div>
+          <div className="flex items-center justify-between">
+            <Link
+              to="/register"
+              className="block text-blue-600 mt-2 hover:underline"
+            >
+              Don’t have an account? Register
+            </Link>
+          </div>
         </div>
       </div>
     </>
