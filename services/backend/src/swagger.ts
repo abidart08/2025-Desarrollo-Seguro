@@ -14,8 +14,8 @@ const options: swaggerJsdoc.Options = {
       description: '🚀 Auto-generated Swagger docs via swagger-jsdoc',
     },
     servers: [
-      { url: 'http://localhost:3000', description: 'Local dev server' },
-      { url: 'http://localhost:5000', description: 'Local dev server' },
+      { url: 'http://localhost:3001', description: 'Local dev server' },
+      { url: 'http://localhost:5001', description: 'Local dev server' },
     ],
   },
   // 2) Tell it where your route files live, so it can extract @swagger‐style JSDoc

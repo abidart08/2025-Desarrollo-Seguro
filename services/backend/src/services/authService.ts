@@ -6,6 +6,8 @@ import { User,UserRow } from '../types/user';
 import jwtUtils from '../utils/jwt';
 import ejs from 'ejs';
 
+import validator from 'validator';
+
 const RESET_TTL = 1000 * 60 * 60;         // 1h
 const INVITE_TTL = 1000 * 60 * 60 * 24 * 7; // 7d
 
@@ -41,11 +43,14 @@ class AuthService {
       }
     });
     const link = `${process.env.FRONTEND_URL}/activate-user?token=${invite_token}&username=${user.username}`;
+
+    const safeFirstName = validator.escape(user.first_name);
+    const safeLastName = validator.escape(user.last_name);
    
     const template = `
       <html>
         <body>
-          <h1>Hello ${user.first_name} ${user.last_name}</h1>
+          <h1>Hello ${safeFirstName} ${safeLastName}</h1>
           <p>Click <a href="${ link }">here</a> to activate your account.</p>
         </body>
       </html>`;

@@ -49,11 +49,27 @@ class InvoiceService {
     // use axios to call http://paymentBrand/payments as a POST request
     // with the body containing ccNumber, ccv, expirationDate
     // and handle the response accordingly
-    const paymentResponse = await axios.post(`http://${paymentBrand}/payments`, {
+    // const paymentResponse = await axios.post(`http://${paymentBrand}/payments`, {
+    //   ccNumber,
+    //   ccv,
+    //   expirationDate
+    // });
+
+    const paymentUrls: Record<string,string> = {
+      visa: 'https://visa-payments.local/payments',
+      mastercard: 'https://mastercard-payments.local/payments',
+      amex: 'https://amex-payments.local/payments'
+    };
+  
+    const url = paymentUrls[paymentBrand];
+    if (!url) throw new Error('Payment brand not supported');
+  
+    const paymentResponse = await axios.post(url, {
       ccNumber,
       ccv,
       expirationDate
     });
+
     if (paymentResponse.status !== 200) {
       throw new Error('Payment failed');
     }
