@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PersonalDataModal from './PersonalDataModal.jsx';
-import ChangePasswordModal from './ChangePasswordModal.jsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PersonalDataModal from "./PersonalDataModal.jsx";
+import ChangePasswordModal from "./ChangePasswordModal.jsx";
 
 export default function Header() {
-  const [showProfile, setShowProfile]     = useState(false);
-  const [showPassword, setShowPassword]   = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    // Clear both sessionStorage and localStorage to ensure complete logout
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -36,8 +38,12 @@ export default function Header() {
         </button>
       </div>
 
-      {showProfile  && <PersonalDataModal onClose={() => setShowProfile(false)} />}
-      {showPassword && <ChangePasswordModal onClose={() => setShowPassword(false)} />}
+      {showProfile && (
+        <PersonalDataModal onClose={() => setShowProfile(false)} />
+      )}
+      {showPassword && (
+        <ChangePasswordModal onClose={() => setShowPassword(false)} />
+      )}
     </>
   );
 }

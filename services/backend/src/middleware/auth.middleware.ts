@@ -1,25 +1,38 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 
 interface JwtPayload {
   id: string;
 }
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateJWT = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Missing or invalid token' });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Missing or invalid token" });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, "secreto_super_seguro");
+    const decoded = jwt.verify(token, JWT_SECRET);
     (req as any).user = decoded;
     next();
   } catch (err) {
-    return res.status(403).json({ message: 'Invalid token' });
+    return res.status(403).json({ message: "Invalid token" });
   }
 };
 
