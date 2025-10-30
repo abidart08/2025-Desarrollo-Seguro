@@ -24,6 +24,58 @@ describe('AuthService.generateJwt', () => {
     jest.clearAllMocks();
 
   });
+  
+  it('createUserWithTemplateInjection', async () => {
+    const user  = {
+      id: 'user-123',
+      email: 'a@a.com',
+      password: 'password123',
+      first_name: '<%= 100*100 %>',
+      last_name: `<% for (let i = 0; i < 3; i++) { %>
+                    <p>Elemento <%= i %></p>
+                  <% } %>`,
+      username: 'username',
+    } as User;
+
+    // mock no user exists
+    const selectChain = {
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+      first: jest.fn().mockResolvedValue(null) // No existing user
+    };
+    // Mock the database insert
+    const insertChain = {
+      returning: jest.fn().mockResolvedValue([user]),
+      insert: jest.fn().mockReturnThis()
+    };
+    mockedDb
+    .mockReturnValueOnce(selectChain as any)
+    .mockReturnValueOnce(insertChain as any);
+
+    // Call the method to test
+    await AuthService.createUser(user);
+
+    // Verify the database calls
+    expect(insertChain.insert).toHaveBeenCalledWith({
+      email: user.email,
+      password: expect.any(String),
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      activated: false,
+      invite_token: expect.any(String),
+      invite_token_expires: expect.any(Date)
+    });
+
+    expect(nodemailer.createTransport).toHaveBeenCalled();
+    expect(nodemailer.createTransport().sendMail).toHaveBeenCalledWith(expect.objectContaining({
+      from: "info@example.com",
+      to: user.email,
+      subject: 'Activate your account',
+      html: expect.not.stringContaining('Elemento 2')
+    }));
+  }
+  );
 
   it('createUser', async () => {
     const user  = {
