@@ -3,39 +3,39 @@
 // process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 //------------------descomentar en practico-2--------------------------------
 
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
-import AuthService from '../../src/services/authService';
-import db from '../../src/db';
-import { User } from '../../src/types/user';
-import jwt from 'jsonwebtoken';
+import AuthService from "../../src/services/authService";
+import db from "../../src/db";
+import { User } from "../../src/types/user";
+import jwt from "jsonwebtoken";
 
-jest.mock('../../src/db');
+jest.mock("../../src/db");
 const mockedDb = db as jest.MockedFunction<typeof db>;
 
 // mock the nodemailer module
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 const mockedNodemailer = nodemailer as jest.Mocked<typeof nodemailer>;
 // mock send email function
 mockedNodemailer.createTransport = jest.fn().mockReturnValue({
   sendMail: jest.fn().mockResolvedValue({ success: true }),
 });
 
-describe('AuthService.generateJwt', () => {
+describe("AuthService.generateJwt", () => {
   const OLD_ENV = process.env;
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
   });
 
-  it('createUser', async () => {
+  it("createUser", async () => {
     const user = {
-      id: 'user-123',
-      email: 'a@a.com',
-      password: 'password123',
-      first_name: '<%=2*2%>', //aca es donde testeamos la inyeccion, que no se ejecute, esto es por ejs
-      last_name: 'Last',
-      username: 'username',
+      id: "user-123",
+      email: "a@a.com",
+      password: "password123",
+      first_name: "<%=2*2%>", //aca es donde testeamos la inyeccion (mandamos la inyeccion), que no se ejecute, esto es por ejs
+      last_name: "Last",
+      username: "username",
     } as User;
 
     // mock no user exists
@@ -68,13 +68,13 @@ describe('AuthService.generateJwt', () => {
       invite_token_expires: expect.any(Date),
     });
 
-   expect(nodemailer.createTransport).toHaveBeenCalled();
+    expect(nodemailer.createTransport).toHaveBeenCalled();
     expect(nodemailer.createTransport().sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
         from: "info@example.com",
         to: user.email,
-        subject: 'Activate your account',
-        html: expect.stringMatching(/(?:&lt;|<)%=2\*2%(?:&gt;|>)/),
+        subject: "Activate your account",
+        html: expect.stringMatching(/(?:&lt;|<)%=2\*2%(?:&gt;|>)/), //Aca verificamos que el template no se haya ejecutado, en su version estandar o escapada
       })
     );
   });
